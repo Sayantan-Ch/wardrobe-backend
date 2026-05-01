@@ -60,9 +60,13 @@ export const uploadImageAndCreateItem = async ({
     const item = await insertClothingItem({
       id: itemId,
       user_id: userId,
-      name: metadata.name,
+      name: metadata.name ?? null,
       category: metadata.category,
-      color: metadata.color ?? null,
+      subcategory: metadata.subcategory,
+      color: metadata.color,
+      color_tone: metadata.color_tone ?? null,
+      formality: metadata.formality,
+      fit: metadata.fit ?? null,
       image_url: imageUrl,
       notes: metadata.notes ?? null,
     });

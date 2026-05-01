@@ -10,6 +10,10 @@ const envSchema = z.object({
   SUPABASE_ANON_KEY: z.string().min(1),
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
   SUPABASE_STORAGE_BUCKET: z.string().min(1).default('wardrobe-images'),
+  OPENROUTER_API_KEY: z.string().min(1),
+  OPENROUTER_BASE_URL: z.url().default('https://openrouter.ai/api/v1'),
+  EXTRACTION_VISION_MODEL: z.string().min(1).default('openai/gpt-4o-mini'),
+  EXTRACTION_NORMALIZATION_MODEL: z.string().min(1).default('openai/gpt-4o-mini'),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);

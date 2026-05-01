@@ -19,11 +19,19 @@ export const createOutfitController = async (req: Request, res: Response, next: 
 
     const result = await createOutfitForUser(req.user.id, parsed.data);
 
-    if (!result.ok) {
+    if (!result.ok && result.reason === 'missing') {
       return res.status(400).json({
         error: 'bad_request',
         message: 'One or more referenced clothing items are missing or not owned by user',
         missing_item_ids: result.missing,
+      });
+    }
+
+    if (!result.ok && result.reason === 'category_mismatch') {
+      return res.status(400).json({
+        error: 'bad_request',
+        message: 'One or more referenced clothing items do not match expected outfit slots',
+        category_mismatch: result.category_mismatch,
       });
     }
 

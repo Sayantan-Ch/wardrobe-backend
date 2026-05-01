@@ -1,4 +1,5 @@
 import { supabaseServiceRoleClient } from '../../config/supabase';
+import type { ClothingCategory } from '../wardrobe/wardrobe.enums';
 
 export interface OutfitInsert {
   user_id: string;
@@ -7,6 +8,11 @@ export interface OutfitInsert {
   footwear_id: string | null;
   context: string | null;
   llm_reason: string | null;
+}
+
+export interface OwnedClothingItem {
+  id: string;
+  category: ClothingCategory;
 }
 
 export const insertOutfit = async (payload: OutfitInsert) => {
@@ -38,12 +44,12 @@ export const listOutfitsForUser = async (userId: string, limit: number) => {
   return data;
 };
 
-export const findOwnedClothingItemIds = async (userId: string, itemIds: string[]) => {
+export const findOwnedClothingItems = async (userId: string, itemIds: string[]) => {
   const uniqueIds = [...new Set(itemIds)];
 
   const { data, error } = await supabaseServiceRoleClient
     .from('clothing_items')
-    .select('id')
+    .select('id, category')
     .eq('user_id', userId)
     .in('id', uniqueIds);
 
@@ -51,5 +57,5 @@ export const findOwnedClothingItemIds = async (userId: string, itemIds: string[]
     throw new Error(`Failed to verify clothing item ownership: ${error.message}`);
   }
 
-  return new Set((data ?? []).map((item) => item.id as string));
+  return (data ?? []) as OwnedClothingItem[];
 };
