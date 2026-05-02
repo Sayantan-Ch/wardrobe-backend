@@ -12,5 +12,10 @@ export const outfitsListQuerySchema = z.object({
   limit: z.coerce.number().int().positive().max(100).default(50),
 });
 
+export const outfitIdParamsSchema = z.object({
+  id: z.uuid(),
+});
+
 export type CreateOutfitInput = z.infer<typeof createOutfitSchema>;
 export type OutfitsListQueryInput = z.infer<typeof outfitsListQuerySchema>;
+export type OutfitIdParamsInput = z.infer<typeof outfitIdParamsSchema>;

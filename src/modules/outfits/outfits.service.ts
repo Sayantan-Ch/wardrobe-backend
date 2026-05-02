@@ -1,4 +1,4 @@
-import { findOwnedClothingItems, insertOutfit, listOutfitsForUser } from './outfits.repository';
+import { deleteOutfitForUser, findOwnedClothingItems, insertOutfit, listOutfitsForUser } from './outfits.repository';
 import type { CreateOutfitInput, OutfitsListQueryInput } from './outfits.schemas';
 import type { ClothingCategory } from '../wardrobe/wardrobe.enums';
 
@@ -97,4 +97,8 @@ export const createOutfitForUser = async (userId: string, input: CreateOutfitInp
 
 export const listOutfits = async (userId: string, query: OutfitsListQueryInput) => {
   return listOutfitsForUser(userId, query.limit);
+};
+
+export const deleteOutfit = async (userId: string, outfitId: string) => {
+  return deleteOutfitForUser(userId, outfitId);
 };

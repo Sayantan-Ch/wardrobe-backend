@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from 'express';
-import { createOutfitSchema, outfitsListQuerySchema } from './outfits.schemas';
-import { createOutfitForUser, listOutfits } from './outfits.service';
+import { createOutfitSchema, outfitsListQuerySchema, outfitIdParamsSchema } from './outfits.schemas';
+import { createOutfitForUser, deleteOutfit, listOutfits } from './outfits.service';
 
 export const createOutfitController = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -58,6 +58,33 @@ export const listOutfitsController = async (req: Request, res: Response, next: N
 
     const outfits = await listOutfits(req.user.id, parsed.data);
     return res.status(200).json({ outfits });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const deleteOutfitController = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'unauthorized', message: 'Authentication is required' });
+    }
+
+    const parsedParams = outfitIdParamsSchema.safeParse(req.params);
+    if (!parsedParams.success) {
+      return res.status(400).json({
+        error: 'bad_request',
+        message: 'Invalid outfit id',
+        details: parsedParams.error.issues,
+      });
+    }
+
+    const deleted = await deleteOutfit(req.user.id, parsedParams.data.id);
+
+    if (!deleted) {
+      return res.status(404).json({ error: 'not_found', message: 'Outfit not found' });
+    }
+
+    return res.status(200).json({ message: 'Outfit deleted successfully' });
   } catch (error) {
     return next(error);
   }

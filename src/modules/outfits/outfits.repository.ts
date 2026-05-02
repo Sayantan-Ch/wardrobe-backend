@@ -59,3 +59,17 @@ export const findOwnedClothingItems = async (userId: string, itemIds: string[]) 
 
   return (data ?? []) as OwnedClothingItem[];
 };
+
+export const deleteOutfitForUser = async (userId: string, outfitId: string): Promise<boolean> => {
+  const { error, count } = await supabaseServiceRoleClient
+    .from('outfits')
+    .delete({ count: 'exact' })
+    .eq('id', outfitId)
+    .eq('user_id', userId);
+
+  if (error) {
+    throw new Error(`Failed to delete outfit: ${error.message}`);
+  }
+
+  return (count ?? 0) > 0;
+};
