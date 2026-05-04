@@ -1,6 +1,12 @@
 import type { NextFunction, Request, Response } from 'express';
+import { generateOutfitsRequestSchema } from './outfit-generation.schemas';
 import { createOutfitSchema, outfitsListQuerySchema, outfitIdParamsSchema } from './outfits.schemas';
-import { createOutfitForUser, deleteOutfit, listOutfits } from './outfits.service';
+import {
+  createOutfitForUser,
+  deleteOutfit,
+  generateOutfitsForUser,
+  listOutfits,
+} from './outfits.service';
 
 export const createOutfitController = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -85,6 +91,28 @@ export const deleteOutfitController = async (req: Request, res: Response, next: 
     }
 
     return res.status(200).json({ message: 'Outfit deleted successfully' });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const generateOutfitsController = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'unauthorized', message: 'Authentication is required' });
+    }
+
+    const parsed = generateOutfitsRequestSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({
+        error: 'bad_request',
+        message: 'Invalid outfit generation request',
+        details: parsed.error.issues,
+      });
+    }
+
+    const result = await generateOutfitsForUser(req.user.id, parsed.data);
+    return res.status(200).json(result);
   } catch (error) {
     return next(error);
   }

@@ -4,7 +4,7 @@ const ONE_MB = 1024 * 1024;
 const MAX_FILE_SIZE = 5 * ONE_MB;
 const ALLOWED_MIME_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
 
-export const uploadSingleImage = multer({
+export const imageUpload = multer({
   storage: multer.memoryStorage(),
   limits: {
     fileSize: MAX_FILE_SIZE,
@@ -18,4 +18,6 @@ export const uploadSingleImage = multer({
 
     cb(null, true);
   },
-}).single('image');
+});
+
+export const uploadSingleImage = imageUpload.single('image');

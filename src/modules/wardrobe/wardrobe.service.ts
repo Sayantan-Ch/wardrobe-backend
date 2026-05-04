@@ -51,7 +51,6 @@ export const updateWardrobeItem = async (
     color_tone?: CreateWardrobeItemInput['color_tone'] | null;
     formality?: CreateWardrobeItemInput['formality'];
     fit?: CreateWardrobeItemInput['fit'] | null;
-    image_url?: string;
     notes?: string | null;
   } = {};
 
@@ -62,7 +61,6 @@ export const updateWardrobeItem = async (
   if (input.color_tone !== undefined) updatePayload.color_tone = input.color_tone;
   if (input.formality !== undefined) updatePayload.formality = input.formality;
   if (input.fit !== undefined) updatePayload.fit = input.fit;
-  if (input.image_url !== undefined) updatePayload.image_url = input.image_url;
   if (input.notes !== undefined) updatePayload.notes = input.notes;
 
   return updateClothingItemForUser(userId, itemId, updatePayload);

@@ -1,6 +1,7 @@
 import { randomUUID } from 'crypto';
 import { env } from '../../config/env';
 import { supabaseServiceRoleClient } from '../../config/supabase';
+import { logger } from '../../lib/logger';
 import { insertClothingItem } from '../wardrobe/wardrobe.repository';
 import type { UploadMetadata } from './upload.schemas';
 
@@ -43,6 +44,16 @@ export const uploadImageAndCreateItem = async ({
   const mimeType = originalMimeType ?? DEFAULT_MIME;
   const objectPath = buildObjectPath(userId, itemId, mimeType);
 
+  logger.info('storage_upload_started', {
+    event: 'storage_upload_started',
+    user_id: userId,
+    item_id: itemId,
+    bucket: env.SUPABASE_STORAGE_BUCKET,
+    object_path: objectPath,
+    mime_type: mimeType,
+    size_bytes: fileBuffer.byteLength,
+  });
+
   const { error: uploadError } = await supabaseServiceRoleClient.storage
     .from(env.SUPABASE_STORAGE_BUCKET)
     .upload(objectPath, fileBuffer, {
@@ -51,10 +62,25 @@ export const uploadImageAndCreateItem = async ({
     });
 
   if (uploadError) {
+    logger.error('storage_upload_failed', {
+      event: 'storage_upload_failed',
+      user_id: userId,
+      item_id: itemId,
+      bucket: env.SUPABASE_STORAGE_BUCKET,
+      object_path: objectPath,
+      error: uploadError.message,
+    });
     throw new Error(`Failed to upload image: ${uploadError.message}`);
   }
 
   const imageUrl = getPublicUrl(env.SUPABASE_STORAGE_BUCKET, objectPath);
+  logger.info('storage_upload_completed', {
+    event: 'storage_upload_completed',
+    user_id: userId,
+    item_id: itemId,
+    bucket: env.SUPABASE_STORAGE_BUCKET,
+    object_path: objectPath,
+  });
 
   try {
     const item = await insertClothingItem({
@@ -71,6 +97,14 @@ export const uploadImageAndCreateItem = async ({
       notes: metadata.notes ?? null,
     });
 
+    logger.info('upload_item_created', {
+      event: 'upload_item_created',
+      user_id: userId,
+      item_id: itemId,
+      category: metadata.category,
+      subcategory: metadata.subcategory,
+    });
+
     return {
       item,
       storage: {
@@ -80,7 +114,39 @@ export const uploadImageAndCreateItem = async ({
       },
     };
   } catch (error) {
-    await supabaseServiceRoleClient.storage.from(env.SUPABASE_STORAGE_BUCKET).remove([objectPath]);
+    logger.error('upload_db_insert_failed', {
+      event: 'upload_db_insert_failed',
+      user_id: userId,
+      item_id: itemId,
+      bucket: env.SUPABASE_STORAGE_BUCKET,
+      object_path: objectPath,
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    });
+
+    const { error: cleanupError } = await supabaseServiceRoleClient.storage
+      .from(env.SUPABASE_STORAGE_BUCKET)
+      .remove([objectPath]);
+
+    if (cleanupError) {
+      logger.error('storage_cleanup_failed', {
+        event: 'storage_cleanup_failed',
+        user_id: userId,
+        item_id: itemId,
+        bucket: env.SUPABASE_STORAGE_BUCKET,
+        object_path: objectPath,
+        error: cleanupError.message,
+      });
+    } else {
+      logger.info('storage_cleanup_completed', {
+        event: 'storage_cleanup_completed',
+        user_id: userId,
+        item_id: itemId,
+        bucket: env.SUPABASE_STORAGE_BUCKET,
+        object_path: objectPath,
+      });
+    }
+
     throw error;
   }
 };

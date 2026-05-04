@@ -2,13 +2,15 @@ import { Router } from 'express';
 import multer from 'multer';
 import { logger } from '../../lib/logger';
 import { requireAuth } from '../../middleware/auth.middleware';
-import { uploadImageController } from './upload.controller';
-import { uploadSingleImage } from './upload.middleware';
+import { imageUpload } from '../upload/upload.middleware';
+import { extractImageController } from './extract.controller';
 
-export const uploadRouter = Router();
+export const extractRouter = Router();
 
-uploadRouter.post('/upload', requireAuth, (req, res, next) => {
-  uploadSingleImage(req, res, (error) => {
+const extractSingleImage = imageUpload.single('image');
+
+extractRouter.post('/extract', requireAuth, (req, res, next) => {
+  extractSingleImage(req, res, (error) => {
     if (!error) {
       next();
       return;
@@ -45,4 +47,4 @@ uploadRouter.post('/upload', requireAuth, (req, res, next) => {
 
     res.status(400).json({ error: 'bad_request', message: error.message });
   });
-}, uploadImageController);
+}, extractImageController);

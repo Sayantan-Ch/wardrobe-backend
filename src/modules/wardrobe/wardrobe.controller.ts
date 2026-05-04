@@ -85,15 +85,8 @@ export const updateWardrobeItemController = async (
     if (!parsedBody.success) {
       return res.status(400).json({
         error: 'bad_request',
-        message: 'Invalid wardrobe update payload',
+        message: 'Validation failed',
         details: parsedBody.error.issues,
-      });
-    }
-
-    if (Object.keys(parsedBody.data).length === 0) {
-      return res.status(400).json({
-        error: 'bad_request',
-        message: 'At least one field must be provided for update',
       });
     }
 

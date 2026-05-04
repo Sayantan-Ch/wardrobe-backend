@@ -40,27 +40,17 @@ export const createWardrobeItemSchema = z
 
 export const updateWardrobeItemSchema = z
   .object({
-    name: z.string().trim().min(1).optional(),
-    category: categorySchema.optional(),
-    subcategory: subcategorySchema.optional(),
-    color: z.enum(CLOTHING_COLORS).optional(),
+    name: z.string().trim().min(1).nullable().optional(),
+    category: categorySchema,
+    subcategory: subcategorySchema,
+    color: z.enum(CLOTHING_COLORS),
     color_tone: z.enum(COLOR_TONES).nullable().optional(),
-    formality: z.enum(CLOTHING_FORMALITIES).optional(),
+    formality: z.enum(CLOTHING_FORMALITIES),
     fit: z.enum(CLOTHING_FITS).nullable().optional(),
-    image_url: z.url().optional(),
     notes: z.string().trim().min(1).nullable().optional(),
   })
-  .superRefine((data, ctx) => {
-    if (data.category && data.subcategory) {
-      enforceCategorySubcategory(
-        {
-          category: data.category,
-          subcategory: data.subcategory,
-        },
-        ctx,
-      );
-    }
-  });
+  .strict()
+  .superRefine(enforceCategorySubcategory);
 
 export const wardrobeListQuerySchema = z.object({
   category: categorySchema.optional(),

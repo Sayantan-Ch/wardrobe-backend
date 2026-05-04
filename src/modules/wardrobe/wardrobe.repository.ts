@@ -1,5 +1,6 @@
 import { AppError } from '../../errors/app-error';
 import { supabaseServiceRoleClient } from '../../config/supabase';
+import { logger } from '../../lib/logger';
 import type {
   ClothingCategory,
   ClothingColor,
@@ -51,6 +52,14 @@ export const insertClothingItem = async (payload: ClothingItemInsert) => {
     .single();
 
   if (error) {
+    logger.error('supabase_query_failed', {
+      event: 'supabase_query_failed',
+      operation: 'clothing_items.insert',
+      supabase_code: error.code,
+      error: error.message,
+      user_id: payload.user_id,
+      item_id: payload.id,
+    });
     throw new Error(`Failed to insert clothing item: ${error.message}`);
   }
 
@@ -72,6 +81,15 @@ export const listClothingItemsForUser = async ({ userId, category, limit }: Clot
   const { data, error } = await query;
 
   if (error) {
+    logger.error('supabase_query_failed', {
+      event: 'supabase_query_failed',
+      operation: 'clothing_items.list',
+      supabase_code: error.code,
+      error: error.message,
+      user_id: userId,
+      category,
+      limit,
+    });
     throw new Error(`Failed to fetch clothing items: ${error.message}`);
   }
 
@@ -91,6 +109,14 @@ export const updateClothingItemForUser = async (
     .select('*');
 
   if (error) {
+    logger.error('supabase_query_failed', {
+      event: 'supabase_query_failed',
+      operation: 'clothing_items.update',
+      supabase_code: error.code,
+      error: error.message,
+      user_id: userId,
+      item_id: itemId,
+    });
     throw new Error(`Failed to update clothing item: ${error.message}`);
   }
 
@@ -106,6 +132,14 @@ export const findClothingItemByIdForUser = async (userId: string, itemId: string
     .maybeSingle();
 
   if (error) {
+    logger.error('supabase_query_failed', {
+      event: 'supabase_query_failed',
+      operation: 'clothing_items.find_by_id',
+      supabase_code: error.code,
+      error: error.message,
+      user_id: userId,
+      item_id: itemId,
+    });
     throw new Error(`Failed to fetch clothing item: ${error.message}`);
   }
 
@@ -122,6 +156,14 @@ export const deleteClothingItemForUser = async (userId: string, itemId: string) 
 
   if (error) {
     if (isForeignKeyViolation(error.code)) {
+      logger.warn('supabase_conflict', {
+        event: 'supabase_conflict',
+        operation: 'clothing_items.delete',
+        supabase_code: error.code,
+        error: error.message,
+        user_id: userId,
+        item_id: itemId,
+      });
       throw new AppError(
         409,
         'conflict',
@@ -129,6 +171,14 @@ export const deleteClothingItemForUser = async (userId: string, itemId: string) 
       );
     }
 
+    logger.error('supabase_query_failed', {
+      event: 'supabase_query_failed',
+      operation: 'clothing_items.delete',
+      supabase_code: error.code,
+      error: error.message,
+      user_id: userId,
+      item_id: itemId,
+    });
     throw new Error(`Failed to delete clothing item: ${error.message}`);
   }
 
