@@ -51,12 +51,12 @@ const envSchema = z.object({
   SUPABASE_STORAGE_BUCKET: z.string().min(1).default('wardrobe-images'),
   OPENROUTER_API_KEY: z.string().min(1),
   OPENROUTER_BASE_URL: z.url().default('https://openrouter.ai/api/v1'),
-  EXTRACTION_VISION_MODEL: z.string().min(1).default('openai/gpt-4o-mini'),
-  EXTRACTION_NORMALIZATION_MODEL: z.string().min(1).default('openai/gpt-4o-mini'),
-  OUTFIT_INTENT_CLASSIFIER_MODEL: z.string().min(1).default('openai/gpt-4o-mini'),
-  OUTFIT_INTENT_REPAIR_MODEL: z.string().min(1).default('openai/gpt-4o-mini'),
-  OUTFIT_CURATOR_MODEL: z.string().min(1).default('openai/gpt-4o-mini'),
-  OUTFIT_CURATOR_REPAIR_MODEL: z.string().min(1).default('openai/gpt-4o-mini'),
+  EXTRACTION_VISION_MODEL: z.string().min(1).default('google/gemma-4-26b-a4b-it'),
+  EXTRACTION_NORMALIZATION_MODEL: z.string().min(1).default('google/gemma-4-26b-a4b-it'),
+  OUTFIT_INTENT_CLASSIFIER_MODEL: z.string().min(1).default('google/gemma-4-26b-a4b-it'),
+  OUTFIT_INTENT_REPAIR_MODEL: z.string().min(1).default('google/gemma-4-26b-a4b-it'),
+  OUTFIT_CURATOR_MODEL: z.string().min(1).default('google/gemma-4-26b-a4b-it'),
+  OUTFIT_CURATOR_REPAIR_MODEL: z.string().min(1).default('google/gemma-4-26b-a4b-it'),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);
